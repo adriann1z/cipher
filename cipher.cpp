@@ -1,23 +1,24 @@
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
+#include <sstream>
+#include <fstream>
+
 using namespace std;
 
-// Function to encrypt or decrypt a text using Caesar Cipher
 string caesarCipher(string text, int encryptionFlag, int key) {
-    // Helper function to shift characters
     auto shiftChar = [](char c, int key, int direction) {
-        if (isalpha(c)) {  // Check if character is a letter
+        if (isalpha(c)) {
             char base = isupper(c) ? 'A' : 'a';
-            // Shift the character and handle wrap-around using modulo 26
             return char((c - base + (key * direction) + 26) % 26 + base);
         }
-        return c;  // Non-alphabet characters remain unchanged
+        return c;
         };
 
-    int direction = (encryptionFlag == 0) ? 1 : -1;  // Direction: 1 for encryption, -1 for decryption
+    int direction = (encryptionFlag == 0) ? 1 : -1;
     string result = "";
 
-    // Process each character of the text
     for (char c : text) {
         result += shiftChar(c, key, direction);
     }
@@ -25,37 +26,107 @@ string caesarCipher(string text, int encryptionFlag, int key) {
     return result;
 }
 
-int main() {
+void clusterGrades() {
+    vector<int> grades = { 100, 98, 15, 30, 25, 70, 82, 66, 78, 40 };
+    vector<int> clusters(11, 0);
+
+    for (int grade : grades) {
+        if (grade >= 0 && grade <= 100) {
+            clusters[grade / 10]++;
+        }
+    }
+
+    cout << "Cluster counts: ";
+    for (int count : clusters) {
+        cout << count;
+    }
+    cout << endl;
+}
+void documentSummary() {
+    string filename = "input.txt";
+    ifstream file(filename);
+
+    if (!file.is_open()) {
+        cout << "Error opening file!" << endl;
+        return;
+    }
+
     string text;
-    int encryptionFlag;
-    int key;
-
-    // Input the text, encryption flag, and key
-    cout << "Enter the text: ";
-    getline(cin, text);  // Use getline to support spaces in input
-
-    cout << "Enter encryption flag (0 for encrypt, 1 for decrypt): ";
-    cin >> encryptionFlag;
-
-    // Check for valid flag (either 0 or 1)
-    if (encryptionFlag != 0 && encryptionFlag != 1)
-    {
-        cout << "Invalid encryption flag. Must be 0 or 1." << endl;
-        return 1;  // Exit with error
+    string line;
+    while (getline(file, line)) {
+        text += line + " ";
     }
 
-    cout << "Enter the key (positive integer): ";
-    cin >> key;
+    file.close();
 
-    // Ensure key is a positive integer
-    if (key <= 0) {
-        cout << "Invalid key. Must be a positive integer." << endl;
-        return 1;  // Exit with error
+    int numberOfSentences = 0;
+    int numberOfWords = 0;
+    map<string, int> wordList;
+
+    for (char c : text) {
+        if (c == '.' || c == '!' || c == '?') {
+            numberOfSentences++;
+        }
     }
 
-    // Call the Caesar cipher function and print the result
-    string result = caesarCipher(text, encryptionFlag, key);
-    cout << "Result: " << result << endl;
+    stringstream ss(text);
+    string word;
+    while (ss >> word) {
+        numberOfWords++;
+        wordList[word]++;
+    }
+
+    cout << "Number of sentences: " << numberOfSentences << endl;
+    cout << "Number of words: " << numberOfWords << endl;
+    cout << "Word frequencies: " << endl;
+    for (const auto& entry : wordList) {
+        cout << entry.first << ": " << entry.second << endl;
+    }
+}
+
+int main() {
+    int choice;
+    cout << "Select an option: " << endl;
+    cout << "1. Caesar Cipher (encrypt/decrypt)" << endl;
+    cout << "2. Grade Clustering" << endl;
+    cout << "3. Document Summary" << endl;
+    cin >> choice;
+
+    if (choice == 1) {
+        string text;
+        int encryptionFlag, key;
+
+        cout << "Enter the text: ";
+        cin.ignore();  
+        getline(cin, text);  
+
+        cout << "Enter encryption flag (0 for encrypt, 1 for decrypt): ";
+        cin >> encryptionFlag;
+
+        cout << "Enter the key (positive integer): ";
+        cin >> key;
+
+        // Validate the input for encryption flag and key
+        if (key <= 0 || (encryptionFlag != 0 && encryptionFlag != 1)) {
+            cout << "Invalid input." << endl;
+        }
+        else {
+            // Perform Caesar cipher encryption or decryption
+            string result = caesarCipher(text, encryptionFlag, key);
+            cout << "Result: " << result << endl;
+        }
+    }
+    else if (choice == 2) {
+        // Task 1: Grade clustering
+        clusterGrades();
+    }
+    else if (choice == 3) {
+        // Task 2: Document summary
+        documentSummary();
+    }
+    else {
+        cout << "Invalid option." << endl;
+    }
 
     return 0;
 }
